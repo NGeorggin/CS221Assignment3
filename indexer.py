@@ -11,6 +11,12 @@ import re
 invertedIndex = dict()
 characters = string.ascii_lowercase + string.digits
 
+for c in characters:
+    file_path = os.getcwd() + "\\indices\\" + c + ".json"
+    f = open(file_path, "w")
+    f.write('{}')
+    f.close()
+
 # with open("invertedIndex.txt", "a+") as invertedIndexFile:
 
 # for folder in :
@@ -85,7 +91,7 @@ for i, subdir in enumerate(fullWalk):
                 keys = [key for key in invertedIndex.keys() if key.startswith(char)]
 
                 if keys:
-                    file_path = os.getcwd() + "\\indices\\" + char
+                    file_path = os.getcwd() + "\\indices\\" + char + ".json"
 
                     try:
                         with open(file_path, "r") as characterFile:
@@ -100,7 +106,7 @@ for i, subdir in enumerate(fullWalk):
 
 file_count = sum(len(files) for _, _, files in os.walk('.\\DEV'))
 for character in characters:
-    file_path = os.getcwd() + "\\indices\\" + character
+    file_path = os.getcwd() + "\\indices\\" + character + ".json"
     try:
         with open(file_path, "r") as characterFile:
             json_index = json.load(characterFile)
