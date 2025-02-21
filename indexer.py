@@ -1,4 +1,5 @@
 # from DEV import *
+import math
 import string
 
 import nltk
@@ -8,6 +9,7 @@ import os # TODO cite os walk
 import re
 
 invertedIndex = dict()
+characters = string.ascii_lowercase + string.digits
 
 # with open("invertedIndex.txt", "a+") as invertedIndexFile:
 
@@ -79,8 +81,6 @@ for i, subdir in enumerate(fullWalk):
                 """
                 invertedIndex[token] = Posting(re.match(r'[a-zA-Z0-9]+', file).group(), wordFreq[token] / total_words)
 
-            characters = string.ascii_lowercase + string.digits
-
             for char in characters:
                 keys = [key for key in invertedIndex.keys() if key.startswith(char)]
 
@@ -97,8 +97,22 @@ for i, subdir in enumerate(fullWalk):
                     with open(file_path, "w") as characterFile:
                         json.dump(combined_index, characterFile)
 
-            
-            
+
+file_count = sum(len(files) for _, _, files in os.walk('.\\DEV'))
+for character in characters:
+    file_path = os.getcwd() + "\\indices\\" + character
+    try:
+        with open(file_path, "r") as characterFile:
+            json_index = json.load(characterFile)
+    except FileNotFoundError:
+        json_index = {}
+
+    for token in json_index:
+        for instance in json_index[token]:
+            instance[1] = instance[1] * math.log(file_count / len(json_index[token]))
+
+    with open(file_path, "w") as characterFile:
+        json.dump(json_index, characterFile)
 
 # Beautiful Soup It
 
