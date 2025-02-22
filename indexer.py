@@ -104,7 +104,11 @@ for i, subdir in enumerate(fullWalk):
                         json.dump(combined_index, characterFile)
 
 
+unique_words = 0
 file_count = sum(len(files) for _, _, files in os.walk('.\\DEV'))
+
+print("File Count: " + str(file_count))
+
 for character in characters:
     file_path = os.getcwd() + "\\indices\\" + character + ".json"
     try:
@@ -114,11 +118,14 @@ for character in characters:
         json_index = {}
 
     for token in json_index:
+        unique_words += 1
         for instance in json_index[token]:
             instance[1] = instance[1] * math.log(file_count / len(json_index[token]))
 
     with open(file_path, "w") as characterFile:
         json.dump(json_index, characterFile)
+
+print("Unique tokens: " + str(unique_words))
 
 # Beautiful Soup It
 
