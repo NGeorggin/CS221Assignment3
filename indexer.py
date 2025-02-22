@@ -28,6 +28,7 @@ for c in characters:
 # print(content)
 
 # key=t, val=[Posting(docid, tf)]
+
 class Posting():
     def __init__(self, docid, tf):
         self.docid = docid
@@ -56,6 +57,15 @@ def json_combine(key_list: list, new_index: dict, disk_index: dict) -> dict:
 
 
 fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
+
+docMapping = dict()
+for i, subdir in enumerate(fullWalk):
+    print(subdir)
+    for file in subdir[2]:
+        print(file)
+        fileStringName = re.match(r'[a-zA-Z0-9]+', file).group()
+        docMapping[fileStringName] = i
+
 for i, subdir in enumerate(fullWalk):
     print(subdir)
     for file in subdir[2]:
@@ -85,7 +95,7 @@ for i, subdir in enumerate(fullWalk):
                 a dictionary, there cannot be more than one occurrence of a token in a given word frequency dictionary.
                 TF score is generated using the word frequency divided by the total words in the document. 
                 """
-                invertedIndex[token] = Posting(re.match(r'[a-zA-Z0-9]+', file).group(), wordFreq[token] / total_words)
+                invertedIndex[token] = Posting(docMapping[re.match(r'[a-zA-Z0-9]+', file).group()], wordFreq[token] / total_words)
 
             for char in characters:
                 keys = [key for key in invertedIndex.keys() if key.startswith(char)]
