@@ -1,16 +1,17 @@
-# import os, re, json
+import os
+import json
 
-# fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
+searchQueryString = input("Search Query: ")
+searchQueryList = searchQueryString.split()
 
-# docMapping = dict()
-# j = 0
-# for i, subdir in enumerate(fullWalk):
-#     # print(subdir)
-#     for file in subdir[2]:
-#         # print(file)
-#         fileStringName = re.match(r'[a-zA-Z0-9]+', file).group()
-#         docMapping[fileStringName] = j
-#         j += 1
-
-# with open(os.getcwd() + "\\documentHashmap.json", "w") as fileObj:
-#     json.dump(docMapping,fileObj) 
+if len(searchQueryList) > 1:
+    pass
+else:
+    with open(os.getcwd() + f"\\indices\\{searchQueryString[0]}.json", "r") as jsonQuery:
+        # TODO implement similarity
+        queryScores = json.load(jsonQuery)[searchQueryString]
+        queryScores = sorted(queryScores, key = lambda x: x[1], reverse = True)
+        if len(queryScores) <= 5:
+            print(queryScores)
+        else:
+            print(queryScores[:5])
