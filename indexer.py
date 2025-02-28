@@ -67,6 +67,7 @@ for i, subdir in enumerate(fullWalk):
         fileStringName = re.match(r'[a-zA-Z0-9]+', file).group()
         docMapping[fileStringName] = j
         j += 1
+        
 
 for i, subdir in enumerate(fullWalk):
     print(subdir)
