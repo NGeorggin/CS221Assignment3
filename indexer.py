@@ -133,7 +133,7 @@ for character in characters:
     for token in json_index:
         unique_words += 1
         for instance in json_index[token]:
-            instance[1] = instance[1] * math.log(file_count / len(json_index[token]))
+            instance[1].append(instance[1] * math.log(file_count / len(json_index[token])))
 
     with open(file_path, "w") as characterFile:
         json.dump(json_index, characterFile)
