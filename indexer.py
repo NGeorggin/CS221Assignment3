@@ -47,20 +47,19 @@ for i, subdir in enumerate(fullWalk):
             content = json.load(fileObj)['content']
             bsObject = bs4.BeautifulSoup(content, features="html.parser")
 
-            # allHeaders = bsObject.find_all('h1') + bsObject.find_all('h2') + bsObject.find_all('h3')
-            # allBold = bsObject.find_all('strong') + bsObject.find_all('b')
-            # allTitles = bsObject.find_all('title') # TODO Check
-            
+            allHeaders = bsObject.find_all('h1') + bsObject.find_all('h2') + bsObject.find_all('h3')
+            allBold = bsObject.find_all('strong') + bsObject.find_all('b')
+            allTitles = bsObject.find_all('title')
+            importantWords = " ".join([str(allHeaders), str(allBold), str(allTitles)]).lower().split(" ")
+
             allText = bsObject.get_text()
-            ## TOKENIZE THE TEXT FROM Assignment 2
+
             wordFreq = {x.lower():0 for x in nltk.word_tokenize(allText) if re.match(r'^[a-zA-Z]+[a-zA-Z0-9]*$', x)}
             
             for word in nltk.word_tokenize(allText):
                 total_words += 1
                 if re.match(r'^[a-zA-Z]+[a-zA-Z0-9]*$', word):
                     wordFreq[word.lower()] += 1
-            # Go through each token and record frequency from part 1 code and get tf from that
-            # print(wordFreq)
 
             for token in wordFreq.keys():
                 """
@@ -68,7 +67,9 @@ for i, subdir in enumerate(fullWalk):
                 a dictionary, there cannot be more than one occurrence of a token in a given word frequency dictionary.
                 TF score is generated using the word frequency divided by the total words in the document. 
                 """
-                invertedIndex[token] = [j, wordFreq[token] / total_words]
+                addon = 1 if token in importantWords else 0
+
+                invertedIndex[token] = [j, (wordFreq[token] + addon) / total_words]
 
             if j % 1000 == 0:
                 print(f"{j} Webpages Writing to JSON. Rate {j*3600/(time.time()-startTime)} Webpages per Hour")
@@ -156,7 +157,7 @@ for character in characters:
         unique_words += 1
         for pairIndex in range(len(json_index[token])):
             try:
-                json_index[token][pairIndex].append(math.log(file_count / len(json_index[token]))) ## TODO check which measure to keep
+                json_index[token][pairIndex][1] = json_index[token][pairIndex][1] * math.log(file_count / len(json_index[token]))
             except:
                 print(json_index[token][pairIndex])
                 pass
