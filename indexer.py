@@ -12,22 +12,6 @@ import time
 invertedIndex = dict()
 characters = string.ascii_lowercase
 
-for c in characters:
-    file_path = os.getcwd() + "\\indices\\" + c + ".json"
-    f = open(file_path, "w")
-    f.write('{}')
-    f.close()
-
-
-# def json_combine(key_list: list, new_index: dict, disk_index: dict) -> dict:
-#     for key in key_list:
-#         if key in disk_index:
-#             disk_index[key].append((new_index[key][0], new_index[key][1]))
-#         else:
-#             disk_index[key] = [(new_index[key][0], new_index[key][1])]
-
-#     return disk_index
-
 
 fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
 
@@ -39,7 +23,16 @@ fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
 #         fileStringName = re.match(r'[a-zA-Z0-9]+', file).group()
 #         docMapping[fileStringName] = j
 #         j += 1
-        
+
+
+######################################
+for c in characters:
+    file_path = os.getcwd() + "\\indices\\" + c + ".json"
+    f = open(file_path, "w")
+    f.write('{}')
+    f.close()
+
+
 j = 0
 for i, subdir in enumerate(fullWalk):
     
@@ -77,14 +70,10 @@ for i, subdir in enumerate(fullWalk):
                 """
                 invertedIndex[token] = [j, wordFreq[token] / total_words]
 
-            if j % 600 == 0:
+            if j % 1000 == 0:
                 print(f"{j} Webpages Writing to JSON. Rate {j*3600/(time.time()-startTime)} Webpages per Hour")
 
-                ## TODO adapt so that it is a list of different lists starting with different letters
-
                 tokenChars = {token[0] for token in invertedIndex.keys()}
-                # print(invertedIndex)
-                # print(tokenChars)
 
                 for char in tokenChars:
                     keys = [key for key in invertedIndex.keys() if key.startswith(char)]
@@ -96,8 +85,6 @@ for i, subdir in enumerate(fullWalk):
                         except FileNotFoundError:
                             json_index = {}
 
-                        # combined_index = json_combine(keys, invertedIndex, json_index)
-                        
                         for key in keys:
                             if key in json_index:
                                 json_index[key].append((invertedIndex[key][0], invertedIndex[key][1]))
@@ -115,8 +102,43 @@ for i, subdir in enumerate(fullWalk):
         j += 1
 
 
-print("Done With TF Calculations")
+print(f"{j} Webpages Writing to JSON. Rate {j*3600/(time.time()-startTime)} Webpages per Hour")
 
+tokenChars = {token[0] for token in invertedIndex.keys()}
+
+for char in tokenChars:
+    keys = [key for key in invertedIndex.keys() if key.startswith(char)]
+    if keys:
+        file_path = os.getcwd() + "\\indices\\" + char + ".json"
+        try:
+            with open(file_path, "r") as characterFile:
+                json_index = json.load(characterFile)
+        except FileNotFoundError:
+            json_index = {}
+
+        for key in keys:
+            if key in json_index:
+                json_index[key].append((invertedIndex[key][0], invertedIndex[key][1]))
+            else:
+                json_index[key] = [(invertedIndex[key][0], invertedIndex[key][1])]
+
+        with open(file_path, "w") as characterFile:
+            json.dump(json_index, characterFile)
+
+        del json_index, keys
+
+del invertedIndex
+invertedIndex = dict()
+
+
+print("Done With TF Calculations")
+####################################### TF Section ^^^
+
+
+
+
+
+####################################### IDF Section vvv
 unique_words = 0
 file_count = sum(len(files) for _, _, files in os.walk('.\\DEV'))
 
@@ -130,12 +152,22 @@ for character in characters:
     except FileNotFoundError:
         json_index = {}
 
-    for token in json_index:
+    for token in json_index.keys():
         unique_words += 1
-        for instance in json_index[token]:
-            instance[1].append(instance[1] * math.log(file_count / len(json_index[token])))
+        for pairIndex in range(len(json_index[token])):
+            try:
+                json_index[token][pairIndex].append(math.log(file_count / len(json_index[token]))) ## TODO check which measure to keep
+            except:
+                print(json_index[token][pairIndex])
+                pass
 
     with open(file_path, "w") as characterFile:
         json.dump(json_index, characterFile)
 
+    del json_index
+
+    print(f"Character {character} Done")
+
 print("Unique tokens: " + str(unique_words))
+
+#######################################
