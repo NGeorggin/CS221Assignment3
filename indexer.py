@@ -33,6 +33,8 @@ for c in characters:
     f.close()
 
 
+
+
 j = 0
 for i, subdir in enumerate(fullWalk):
     
@@ -54,11 +56,11 @@ for i, subdir in enumerate(fullWalk):
 
             allText = bsObject.get_text()
 
-            wordFreq = {x.lower():0 for x in nltk.word_tokenize(allText) if re.match(r'^[a-zA-Z]+[a-zA-Z0-9]*$', x)}
+            wordFreq = {x.lower():0 for x in nltk.word_tokenize(allText) if re.match(r'^[a-zA-Z0-9]+$', x)}
             
             for word in nltk.word_tokenize(allText):
                 total_words += 1
-                if re.match(r'^[a-zA-Z]+[a-zA-Z0-9]*$', word):
+                if re.match(r'^[a-zA-Z0-9]+$', word):
                     wordFreq[word.lower()] += 1
 
             for token in wordFreq.keys():
@@ -145,7 +147,7 @@ file_count = sum(len(files) for _, _, files in os.walk('.\\DEV'))
 
 print("File Count: " + str(file_count))
 
-for character in characters:
+for character in characters + '0123456789':
     file_path = os.getcwd() + "\\indices\\" + character + ".json"
     try:
         with open(file_path, "r") as characterFile:
