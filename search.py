@@ -13,8 +13,8 @@ if len(searchQueryList) > 1:
     
     docDictionary = dict()
     for word in searchQueryList:
-        with open(os.getcwd() + f"\\indices\\{word.lower()[0]}.json", "r") as jsonQuery:
-            for docid, tfidf in sorted(json.load(jsonQuery)[word.lower()], key = lambda x: x[1], reverse = True):
+        with open(os.getcwd() + f"\\indices\\{word[0].lower()}.json", "r") as jsonQuery:
+            for docid, tfidf in json.load(jsonQuery)[word.lower()]:
                 if docid in docDictionary:
                     docDictionary[docid] += tfidf
                 else:
@@ -34,7 +34,7 @@ if len(searchQueryList) > 1:
 
 
 else:
-    with open(os.getcwd() + f"\\indices\\{searchQueryString.lower()[0]}.json", "r") as jsonQuery:
+    with open(os.getcwd() + f"\\indices\\{searchQueryString[0].lower()}.json", "r") as jsonQuery:
         # TODO implement similarity
         queryScores = json.load(jsonQuery)[searchQueryString.lower()]
         queryScores = sorted(queryScores, key = lambda x: x[1], reverse = True)
