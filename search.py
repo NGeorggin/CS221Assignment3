@@ -116,17 +116,20 @@ while True:
 # with open(os.getcwd() + "\\documentHashmap.json", "w") as documentHashmap:
 #     json.dump(docMapping, documentHashmap)
 
-#
+######################################
+
 # import json
 # import pickle
-#
+# import string
+# import os
+
 # characters = string.ascii_lowercase + string.digits
-#
+
 # for x in characters:
-#     with open(f"{os.getcwd() + "\\indices\\"}{x}.json", "r") as json_file:
+#     with open(os.getcwd() + "\\indices\\" + x + ".json", "r") as json_file:
 #         data = json.load(json_file)
-#
-#     with open(f"{os.getcwd() + "\\indices_pickle\\"}{x}.pkl", "wb") as pickle_file:
+
+#     with open(os.getcwd() + "\\indices_pickle\\" + x + ".pkl", "wb") as pickle_file:
 #         pickle.dump(data, pickle_file)
-#
+
 # print("pickle!")
