@@ -10,7 +10,7 @@ import re
 import time
 
 invertedIndex = dict()
-characters = string.ascii_lowercase
+characters = string.ascii_lowercase + string.digits
 
 
 fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
@@ -41,7 +41,7 @@ for i, subdir in enumerate(fullWalk):
     invertedIndex = dict()
     startTime = time.time()
     for file in subdir[2]:
-
+      
         fileName = f".\\{subdir[0]}\\{file}"
         
         total_words = 0
@@ -71,7 +71,12 @@ for i, subdir in enumerate(fullWalk):
                 """
                 addon = 1 if token in importantWords else 0
 
-                invertedIndex[token] = [j, (wordFreq[token] + addon) / total_words]
+                if token in invertedIndex.keys():
+                    invertedIndex[token].append([j, (wordFreq[token] + addon) / total_words])
+                else:
+                    invertedIndex[token] = [[j, (wordFreq[token] + addon) / total_words]]
+
+
 
             if j % 1000 == 0:
                 print(f"{j} Webpages Writing to JSON. Rate {j*3600/(time.time()-startTime)} Webpages per Hour")
@@ -90,9 +95,12 @@ for i, subdir in enumerate(fullWalk):
 
                         for key in keys:
                             if key in json_index:
-                                json_index[key].append((invertedIndex[key][0], invertedIndex[key][1]))
+                                for sublist in invertedIndex[key]:
+                                    json_index[key].append(sublist)
                             else:
-                                json_index[key] = [(invertedIndex[key][0], invertedIndex[key][1])]
+                                json_index[key] = []
+                                for sublist in invertedIndex[key]:
+                                    json_index[key].append(sublist)
 
                         with open(file_path, "w") as characterFile:
                             json.dump(json_index, characterFile)
@@ -103,6 +111,7 @@ for i, subdir in enumerate(fullWalk):
                 invertedIndex = dict()
 
         j += 1
+      
 
 
 print(f"{j} Webpages Writing to JSON. Rate {j*3600/(time.time()-startTime)} Webpages per Hour")
@@ -121,9 +130,12 @@ for char in tokenChars:
 
         for key in keys:
             if key in json_index:
-                json_index[key].append((invertedIndex[key][0], invertedIndex[key][1]))
+                for sublist in invertedIndex[key]:
+                    json_index[key].append(sublist)
             else:
-                json_index[key] = [(invertedIndex[key][0], invertedIndex[key][1])]
+                json_index[key] = []
+                for sublist in invertedIndex[key]:
+                    json_index[key].append(sublist)
 
         with open(file_path, "w") as characterFile:
             json.dump(json_index, characterFile)
@@ -132,6 +144,7 @@ for char in tokenChars:
 
 del invertedIndex
 invertedIndex = dict()
+
 
 
 print("Done With TF Calculations")
@@ -147,7 +160,7 @@ file_count = sum(len(files) for _, _, files in os.walk('.\\DEV'))
 
 print("File Count: " + str(file_count))
 
-for character in characters + '0123456789':
+for character in characters:
     file_path = os.getcwd() + "\\indices\\" + character + ".json"
     try:
         with open(file_path, "r") as characterFile:
