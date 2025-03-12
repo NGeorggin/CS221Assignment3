@@ -39,7 +39,7 @@ while True:
         exact_query_scores = sorted(list(exact_query_scores.keys()), key = lambda x: exact_query_scores[x], reverse = True)[:5]
 
         for i in range(len(exact_query_scores)):
-            print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i])][1]}, {docMapping[str(exact_query_scores[i])]}")
+            print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i])][1]}")
         if len(exact_query_scores) < 5:
             fuzzy_scores = {}
 
@@ -54,10 +54,10 @@ while True:
                         score += term.get(doc)
                 fuzzy_scores[doc] = (count, score)
 
-            fuzzy_scores = sorted(fuzzy_scores.items(), key=lambda item: (item[1][1], item[1][0]))[:5-len(exact_query_scores)]
+            fuzzy_scores = sorted(fuzzy_scores.items(), key=lambda item: (item[1][1], item[1][0]), reverse=1)[:5-len(exact_query_scores)]
 
             for i in range(len(fuzzy_scores)):
-                print(f"Page {i + len(exact_query_scores)}: {docMapping[str(fuzzy_scores[i][0])][1]}, {docMapping[str(fuzzy_scores[i][0])]}")
+                print(f"Page {i + len(exact_query_scores)}: {docMapping[str(fuzzy_scores[i][0])][1]}")
 
         # master of software engineering
         # if len(exact_query_scores) < 5:
@@ -116,20 +116,3 @@ while True:
 # with open(os.getcwd() + "\\documentHashmap.json", "w") as documentHashmap:
 #     json.dump(docMapping, documentHashmap)
 
-######################################
-
-# import json
-# import pickle
-# import string
-# import os
-
-# characters = string.ascii_lowercase + string.digits
-
-# for x in characters:
-#     with open(os.getcwd() + "\\indices\\" + x + ".json", "r") as json_file:
-#         data = json.load(json_file)
-
-#     with open(os.getcwd() + "\\indices_pickle\\" + x + ".pkl", "wb") as pickle_file:
-#         pickle.dump(data, pickle_file)
-
-# print("pickle!")

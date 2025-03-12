@@ -8,10 +8,12 @@ import json
 import os # TODO cite os walk
 import re
 import time
+import pickle
 
 invertedIndex = dict()
 characters = string.ascii_lowercase + string.digits
 
+docTextHashTable = set()
 
 fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
 
@@ -33,8 +35,6 @@ for c in characters:
     f.close()
 
 
-
-
 j = 0
 for i, subdir in enumerate(fullWalk):
     
@@ -47,12 +47,23 @@ for i, subdir in enumerate(fullWalk):
         total_words = 0
         with open(fileName, "r") as fileObj:
             content = json.load(fileObj)['content']
+            
+
+            # TODO TODO Cite the hash documentation
+            if hash(content) in docTextHashTable:
+                print(f"Document Content with Hash {hash(content)} has already been evaluated. Skipping...")
+                j += 1
+                continue
+            
+            
+            docTextHashTable.add(hash(content))
+        
             bsObject = bs4.BeautifulSoup(content, features="html.parser")
 
             allHeaders = bsObject.find_all('h1') + bsObject.find_all('h2') + bsObject.find_all('h3')
             allBold = bsObject.find_all('strong') + bsObject.find_all('b')
             allTitles = bsObject.find_all('title')
-            importantWords = " ".join([str(allHeaders), str(allBold), str(allTitles)]).lower().split(" ")
+            importantWords = set(" ".join([str(allHeaders), str(allBold), str(allTitles)]).lower().split(" "))
 
             allText = bsObject.get_text()
 
@@ -182,7 +193,21 @@ for character in characters:
 
     del json_index
 
-    print(f"Character {character} Done")
+    print(f"JSON Character {character} Done")
+
+
+# characters = string.ascii_lowercase + string.digits
+
+for x in characters:
+    with open(os.getcwd() + "\\indices\\" + x + ".json", "r") as json_file:
+        data = json.load(json_file)
+
+    with open(os.getcwd() + "\\indices_pickle\\" + x + ".pkl", "wb") as pickle_file:
+        pickle.dump(data, pickle_file)
+
+    print(f"PKL Character {x} Done")
+
+print("Done With IDF Calculations")
 
 print("Unique tokens: " + str(unique_words))
 
