@@ -192,6 +192,10 @@ for character in characters:
                 print(json_index[token][pairIndex])
                 pass
 
+    for token in json_index.keys():
+        json_index[token] = sorted(json_index[token], key=lambda x: x[1], reverse = True)
+            
+
     with open(file_path, "w") as characterFile:
         json.dump(json_index, characterFile)
 

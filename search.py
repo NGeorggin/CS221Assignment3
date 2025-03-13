@@ -29,9 +29,7 @@ while True:
 
         for word in searchQueryList:
             with open(os.getcwd() + f"\\indices_pickle\\{word[0].lower()}.pkl", "rb") as jsonQuery:
-                pickle_index = pickle.load(jsonQuery)
-                index = dict(pickle_index[word.lower()])
-                res.append(index)
+                res.append(dict(pickle.load(jsonQuery)[word.lower()]))
 
         exact_match_documents = set(res[0].keys())
         for term_dict in res[1:]:
@@ -69,35 +67,18 @@ while True:
             for i in range(len(fuzzy_scores)):
                 print(f"Page {i + len(exact_query_scores)}: {docMapping[str(fuzzy_scores[i][0])][1]}")
 
-        # master of software engineering
-        # if len(exact_query_scores) < 5:
-        #     for i in range(len(exact_query_scores)):
-        #         print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i])][1]}")
-        #
-        # else:
-        #     for i in range(5):
-        #         print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i])][1]}")
-
-
 
     else:
         with open(os.getcwd() + f"\\indices\\{searchQueryString[0].lower()}.json", "r") as jsonQuery:
 
-
-            exact_query_scores = json.load(jsonQuery)[searchQueryString.lower()]
+            exact_query_scores = json.load(jsonQuery)[searchQueryString.lower()][:5]
             
-            exact_query_scores = sorted(exact_query_scores, key = lambda x: x[1], reverse = True)
-            if len(exact_query_scores) < 5:
-                for i in range(len(exact_query_scores)):
-                    print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i][0])][1]}")
+            for i in range(len(exact_query_scores)):
+                print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i][0])][1]}")
 
-                ## TODO TODO similarity
-                # print(exact_query_scores)
-            else:
-                for i in range(5):
-                    print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i][0])][1]}")
-                
-
+            ## TODO TODO similarity
+            # print(exact_query_scores)
+            
     print(f"Time Elapsed: {int(1000*(time.time() - startTime))} milliseconds")
 
 
