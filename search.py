@@ -4,10 +4,15 @@ import json
 import pickle
 import string
 import time
+import nltk
 from collections import defaultdict, Counter
 
 with open(os.getcwd() + "\\documentHashmap.json", "r") as documentHashmap:
     docMapping = json.load(documentHashmap)
+
+#TODO stem here
+#TODO Cite Stemmer https://guides.library.upenn.edu/penntdm/python/nltk
+porter = nltk.stem.PorterStemmer()
 
 while True:
     # TODO: clean/sanitise input
@@ -16,11 +21,14 @@ while True:
 
     searchQueryList = searchQueryString.split()
 
+    for i in range(len(searchQueryList)):
+        searchQueryList[i] = porter.stem(searchQueryList[i])
+
     if len(searchQueryList) > 1:
         res = []
 
         for word in searchQueryList:
-            with open(os.getcwd() + f"\\indices_pickle\\{word.lower()[0]}.pkl", "rb") as jsonQuery:
+            with open(os.getcwd() + f"\\indices_pickle\\{word[0].lower()}.pkl", "rb") as jsonQuery:
                 pickle_index = pickle.load(jsonQuery)
                 index = dict(pickle_index[word.lower()])
                 res.append(index)
@@ -41,6 +49,8 @@ while True:
         for i in range(len(exact_query_scores)):
             print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i])][1]}")
         if len(exact_query_scores) < 5:
+            
+            print("Executing Fuzzy Scores")
             fuzzy_scores = {}
 
             term_count = Counter()
@@ -54,7 +64,7 @@ while True:
                         score += term.get(doc)
                 fuzzy_scores[doc] = (count, score)
 
-            fuzzy_scores = sorted(fuzzy_scores.items(), key=lambda item: (item[1][1], item[1][0]), reverse=1)[:5-len(exact_query_scores)]
+            fuzzy_scores = sorted(fuzzy_scores.items(), key=lambda item: (item[1][1], item[1][0]), reverse=True)[:5-len(exact_query_scores)]
 
             for i in range(len(fuzzy_scores)):
                 print(f"Page {i + len(exact_query_scores)}: {docMapping[str(fuzzy_scores[i][0])][1]}")
@@ -71,21 +81,22 @@ while True:
 
 
     else:
-        with open(os.getcwd() + f"\\indices\\{searchQueryString.lower()[0]}.json", "r") as jsonQuery:
-            # TODO implement similarity
+        with open(os.getcwd() + f"\\indices\\{searchQueryString[0].lower()}.json", "r") as jsonQuery:
+
+
             exact_query_scores = json.load(jsonQuery)[searchQueryString.lower()]
-            # print(len(exact_query_scores))
+            
             exact_query_scores = sorted(exact_query_scores, key = lambda x: x[1], reverse = True)
             if len(exact_query_scores) < 5:
                 for i in range(len(exact_query_scores)):
                     print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i][0])][1]}")
 
-                ## TODO TODO full 5 options
+                ## TODO TODO similarity
                 # print(exact_query_scores)
             else:
                 for i in range(5):
                     print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i][0])][1]}")
-                # print(exact_query_scores[:5])
+                
 
     print(f"Time Elapsed: {int(1000*(time.time() - startTime))} milliseconds")
 

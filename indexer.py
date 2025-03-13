@@ -17,15 +17,9 @@ docTextHashTable = set()
 
 fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
 
-# docMapping = dict()
-# j = 0
-# for i, subdir in enumerate(fullWalk):
-#     # print(subdir)
-#     for file in subdir[2]:
-#         fileStringName = re.match(r'[a-zA-Z0-9]+', file).group()
-#         docMapping[fileStringName] = j
-#         j += 1
-
+#TODO stem here
+#TODO Cite Stemmer https://guides.library.upenn.edu/penntdm/python/nltk
+porter = nltk.stem.PorterStemmer()
 
 ######################################
 for c in characters:
@@ -55,7 +49,6 @@ for i, subdir in enumerate(fullWalk):
                 j += 1
                 continue
             
-            
             docTextHashTable.add(hash(content))
         
             bsObject = bs4.BeautifulSoup(content, features="html.parser")
@@ -74,18 +67,29 @@ for i, subdir in enumerate(fullWalk):
                 if re.match(r'^[a-zA-Z0-9]+$', word):
                     wordFreq[word.lower()] += 1
 
+
+            stemmedWordFreq = {}
             for token in wordFreq.keys():
+                magnify = 1.1 if token in importantWords else 1
+
+                if porter.stem(token) in stemmedWordFreq.keys():
+                    stemmedWordFreq[porter.stem(token)] += (wordFreq[token] * magnify)
+                else:
+                    stemmedWordFreq[porter.stem(token)] = (wordFreq[token] * magnify)
+
+                #TODO Cite Stemmer
+                #TODO Check for Duplicate j values in lists see if valid
+
+            for token in stemmedWordFreq.keys():
                 """
                 Since a new instance of inverted index is generated for every file, and the frequency list is stored as
                 a dictionary, there cannot be more than one occurrence of a token in a given word frequency dictionary.
                 TF score is generated using the word frequency divided by the total words in the document. 
                 """
-                addon = 1 if token in importantWords else 0
-
                 if token in invertedIndex.keys():
-                    invertedIndex[token].append([j, (wordFreq[token] + addon) / total_words])
+                    invertedIndex[token].append([j, stemmedWordFreq[token] / total_words])
                 else:
-                    invertedIndex[token] = [[j, (wordFreq[token] + addon) / total_words]]
+                    invertedIndex[token] = [[j, stemmedWordFreq[token] / total_words]]
 
 
 
