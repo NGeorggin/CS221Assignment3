@@ -69,8 +69,9 @@ while True:
 
 
     else:
+        
         with open(os.getcwd() + f"\\indices\\{searchQueryString[0].lower()}.json", "r") as jsonQuery:
-
+            
             exact_query_scores = json.load(jsonQuery)[searchQueryString.lower()][:5]
             
             for i in range(len(exact_query_scores)):
