@@ -15,7 +15,8 @@ def searchGUI():
         urlLabel = tk.Label(root, text=f"Query Results:\nNo Results Found.\n\nTime Elapsed: {elapsedTime} milliseconds.\n", bg="light blue")
         urlLabel.pack()
     else:
-        urlLabel = tk.Label(root, text=f"Query Results:\n" + ("\n".join([docMapping[str(docid[0])][1] for docid in resultList])) + f"\n\nTime Elapsed: {elapsedTime} milliseconds.\n", bg="light blue")
+        print(resultList)
+        urlLabel = tk.Label(root, text=f"Query Results:\n" + ("\n".join([docMapping[str(docid)][1] for docid in resultList])) + f"\n\nTime Elapsed: {elapsedTime} milliseconds.\n", bg="light blue")
         urlLabel.pack()
 
 with open(os.getcwd() + "\\documentHashmap.json", "r") as documentHashmap:

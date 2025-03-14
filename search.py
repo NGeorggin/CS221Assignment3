@@ -47,6 +47,7 @@ def search(searchQueryString):
             exact_query_scores = list(islice(res[0].keys(), 5))
 
             returnableList = exact_query_scores
+            print("Case 1:", returnableList)
 
             # for i in range(len(exact_query_scores)):
             #     print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i])][1]}")
@@ -61,7 +62,10 @@ def search(searchQueryString):
 
             query_result = heapq.nlargest(5, query_keys, key=query_dict.get)
 
+            
             returnableList = query_result
+            print("Case 2:", returnableList)
+
 
             # for i in range(len(query_result)):
             #     print(f"Page {i + 1}: {docMapping[str(query_result[i])][1]}")
@@ -84,7 +88,9 @@ def search(searchQueryString):
 
                 fuzzy_scores = sorted(fuzzy_scores.items(), key=lambda item: (item[1][1], item[1][0]), reverse=True)[:5 - len(query_result)]
 
-                returnableList += fuzzy_scores
+                returnableList += [item[0] for item in fuzzy_scores]
+                print("Case 3:", returnableList)
+
 
                 # for i in range(len(fuzzy_scores)):
                 #     print(f"Page {i + len(query_result) + 1}: {docMapping[str(fuzzy_scores[i][0])][1]}")
@@ -96,7 +102,9 @@ def search(searchQueryString):
 
                     exact_query_scores = json.load(jsonQuery)[porter.stem(searchQueryString.lower())][:5]
 
-                    returnableList = exact_query_scores
+                    returnableList = [docid[0] for docid in exact_query_scores]
+                    print("Case 4:", returnableList)
+
 
                     # for i in range(len(exact_query_scores)):
                     #     print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i][0])][1]}, {docMapping[str(exact_query_scores[i][0])]}")
