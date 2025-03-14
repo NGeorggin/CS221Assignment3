@@ -10,7 +10,8 @@ def searchGUI():
 
     resultList, elapsedTime = search(searchQuery.get())
 
-    if resultList == None:
+
+    if resultList == []:
         urlLabel = tk.Label(root, text=f"Query Results:\nNo Results Found.\n\nTime Elapsed: {elapsedTime} milliseconds.\n", bg="light blue")
         urlLabel.pack()
     else:
