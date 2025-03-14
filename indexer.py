@@ -215,6 +215,8 @@ for x in characters:
 
     print(f"PKL Character {x} Done")
 
+
+
 print("Done With IDF Calculations")
 
 print("Unique tokens: " + str(unique_words))

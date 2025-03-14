@@ -98,9 +98,9 @@ def search(searchQueryString):
 
     else:
         try:
-            with open(os.getcwd() + f"\\indices\\{searchQueryString[0].lower()}.json", "r") as jsonQuery:
+            with open(os.getcwd() + f"\\indices_pickle\\{searchQueryString[0].lower()}.pkl", "rb") as jsonQuery:
 
-                    exact_query_scores = json.load(jsonQuery)[porter.stem(searchQueryString.lower())][:5]
+                    exact_query_scores = pickle.load(jsonQuery)[porter.stem(searchQueryString.lower())][:5]
 
                     returnableList = [docid[0] for docid in exact_query_scores]
                     print("Case 4:", returnableList)
