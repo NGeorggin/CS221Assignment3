@@ -3,7 +3,7 @@ import string
 import nltk
 import bs4
 import json
-import os # TODO cite os walk
+import os
 import re
 import time
 import pickle
@@ -13,8 +13,8 @@ characters = string.ascii_lowercase + string.digits
 
 docTextHashTable = set()
 
+# OS Walk to cycle through all folders and files in DEV functionality from (Matloff, 2009).
 fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
-
 
 # Porter Stemmer from (NLTK Package, 2024).
 porter = nltk.stem.PorterStemmer()
@@ -33,6 +33,7 @@ j = 0 # Counting the number of files in DEV
 invertedIndex = dict() 
 startTime = time.time()
 
+# OS Walk to cycle through all folders and files in DEV functionality from (Matloff, 2009).
 # Cycle through the files in DEV
 for i, subdir in enumerate(fullWalk):
     for file in subdir[2]:
@@ -76,8 +77,11 @@ for i, subdir in enumerate(fullWalk):
                     wordFreq[word.lower()] += 1
 
 
+            # Make a new dictionary to hold the stemmed tokens
             stemmedWordFreq = {}
             for token in wordFreq.keys():
+
+                # Add a small multiplier if the word in question appears in the headers or bold
                 magnify = 1.1 if token in importantWords else 1
 
                 # Porter Stemmer Implementation from (NLTK Package, 2024).
@@ -86,7 +90,7 @@ for i, subdir in enumerate(fullWalk):
                 else:
                     stemmedWordFreq[porter.stem(token)] = (wordFreq[token] * magnify)
 
-
+            # Finish the TF Calculation and add to inverted index
             for token in stemmedWordFreq.keys():
                 """
                 Since a new instance of inverted index is generated for every file, and the frequency list is stored as
@@ -99,15 +103,16 @@ for i, subdir in enumerate(fullWalk):
                     invertedIndex[token] = [[j, stemmedWordFreq[token] / total_words]]
 
 
-
+            # Every 1000 pages to find balance in space/runtime tradeoffs
             if j % 1000 == 0:
                 print(f"{j} Webpages Writing to JSON. Rate {j*3600/(time.time()-startTime)} Webpages per Hour")
 
+                # For each unique token starting character
                 tokenChars = {token[0] for token in invertedIndex.keys()}
-
                 for char in tokenChars:
                     keys = [key for key in invertedIndex.keys() if key.startswith(char)]
                     if keys:
+                        # Open up that json file
                         file_path = os.getcwd() + "\\indices\\" + char + ".json"
                         try:
                             with open(file_path, "r") as characterFile:
@@ -115,6 +120,7 @@ for i, subdir in enumerate(fullWalk):
                         except FileNotFoundError:
                             json_index = {}
 
+                        # Add the inverted index to the JSON Dictionary
                         for key in keys:
                             if key in json_index:
                                 for sublist in invertedIndex[key]:
@@ -124,25 +130,28 @@ for i, subdir in enumerate(fullWalk):
                                 for sublist in invertedIndex[key]:
                                     json_index[key].append(sublist)
 
+                        # Write it to the JSON Files
                         with open(file_path, "w") as characterFile:
                             json.dump(json_index, characterFile)
 
+                        # Reset the appropriate variables to wisely use space
                         del json_index, keys
 
                 del invertedIndex
                 invertedIndex = dict()
 
-        j += 1
+        j += 1 # Increment File Counter
       
 
-
+# At the end of the scan...
 print(f"{j} Webpages Writing to JSON. Rate {j*3600/(time.time()-startTime)} Webpages per Hour")
 
+# For each unique token starting character
 tokenChars = {token[0] for token in invertedIndex.keys()}
-
 for char in tokenChars:
     keys = [key for key in invertedIndex.keys() if key.startswith(char)]
     if keys:
+        # Open up that json file
         file_path = os.getcwd() + "\\indices\\" + char + ".json"
         try:
             with open(file_path, "r") as characterFile:
@@ -150,6 +159,7 @@ for char in tokenChars:
         except FileNotFoundError:
             json_index = {}
 
+        # Add the inverted index to the JSON Dictionary   
         for key in keys:
             if key in json_index:
                 for sublist in invertedIndex[key]:
@@ -159,9 +169,11 @@ for char in tokenChars:
                 for sublist in invertedIndex[key]:
                     json_index[key].append(sublist)
 
+        # Write it to the JSON Files
         with open(file_path, "w") as characterFile:
             json.dump(json_index, characterFile)
 
+        # Reset the appropriate variables to wisely use space
         del json_index, keys
 
 del invertedIndex
@@ -169,13 +181,17 @@ invertedIndex = dict()
 
 print("Done With TF Calculations")
 
-
+# Count the files in DEV
 unique_words = 0
+
+# OS Walk to cycle through all folders and files in DEV functionality from (Matloff, 2009).
 file_count = sum(len(files) for _, _, files in os.walk('.\\DEV'))
 
 print("File Count: " + str(file_count))
 
+# For each of the JSON files denoted by a character
 for character in characters:
+    # Open the file and get the dictionary
     file_path = os.getcwd() + "\\indices\\" + character + ".json"
     try:
         with open(file_path, "r") as characterFile:
@@ -183,6 +199,7 @@ for character in characters:
     except FileNotFoundError:
         json_index = {}
 
+    # Complete the IDF Calculation for each token
     for token in json_index.keys():
         unique_words += 1
         for pairIndex in range(len(json_index[token])):
@@ -192,10 +209,11 @@ for character in characters:
                 print(json_index[token][pairIndex])
                 pass
 
+    # Sort the list from highest to lowest TF-IDF score
     for token in json_index.keys():
         json_index[token] = sorted(json_index[token], key=lambda x: x[1], reverse = True)
             
-
+    # Write the updated dictionary back to the file
     with open(file_path, "w") as characterFile:
         json.dump(json_index, characterFile)
 
@@ -203,6 +221,7 @@ for character in characters:
 
     print(f"JSON Character {character} Done")
 
+# Make a copy of the JSON file into a PKL Format and store them for quicker access during search
 for x in characters:
     with open(os.getcwd() + "\\indices\\" + x + ".json", "r") as json_file:
         data = json.load(json_file)
@@ -217,7 +236,7 @@ print("Done With IDF Calculations")
 print("Unique tokens: " + str(unique_words))
 
 
-
 # Reference(s):
 # Hashing and Dictionaries. (2019). Carnegie Mellon University. https://www.cs.cmu.edu/~15110-f19/slides/week8-1-hashing.pdf
+# Matloff, N. (2009). Tutorial on File and Directory Access in Python. University of California, Davis. https://heather.cs.ucdavis.edu/matloff/public_html/Python/PyFileDir.pdf
 # NLTK Package. (2024). University of Pennsylvania. https://guides.library.upenn.edu/penntdm/python/nltk
