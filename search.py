@@ -1,16 +1,11 @@
 import os
-import json
 import pickle
 import time
 import heapq
+import nltk
 from concurrent.futures import ThreadPoolExecutor
 from itertools import islice
-
-import nltk
 from collections import Counter
-
-# with open(os.getcwd() + "\\documentHashmap.json", "r") as documentHashmap:
-#     docMapping = json.load(documentHashmap)
 
 
 def search(searchQueryString):
@@ -19,12 +14,10 @@ def search(searchQueryString):
 
     returnableList = []
 
-    # TODO stem here
-    # TODO Cite Stemmer https://guides.library.upenn.edu/penntdm/python/nltk
+    # Porter Stemmer from (NLTK Package, 2024).
     porter = nltk.stem.PorterStemmer()
-
-    # while True:
     
+    # Porter Stemmer Implementation from (NLTK Package, 2024).
     searchQueryList = set([porter.stem(word) for word in searchQueryString.split()])
 
     if len(searchQueryList) > 1:
@@ -49,8 +42,6 @@ def search(searchQueryString):
             returnableList = exact_query_scores
             print("Case 1:", returnableList)
 
-            # for i in range(len(exact_query_scores)):
-            #     print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i])][1]}")
 
         else:
 
@@ -66,9 +57,6 @@ def search(searchQueryString):
             returnableList = query_result
             print("Case 2:", returnableList)
 
-
-            # for i in range(len(query_result)):
-            #     print(f"Page {i + 1}: {docMapping[str(query_result[i])][1]}")
 
             if len(query_result) < 5:
 
@@ -92,58 +80,27 @@ def search(searchQueryString):
                 print("Case 3:", returnableList)
 
 
-                # for i in range(len(fuzzy_scores)):
-                #     print(f"Page {i + len(query_result) + 1}: {docMapping[str(fuzzy_scores[i][0])][1]}")
-
-
     else:
         try:
             with open(os.getcwd() + f"\\indices_pickle\\{searchQueryString[0].lower()}.pkl", "rb") as jsonQuery:
 
+                    # Porter Stemmer Implementation from (NLTK Package, 2024).
                     exact_query_scores = pickle.load(jsonQuery)[porter.stem(searchQueryString.lower())][:5]
 
                     returnableList = [docid[0] for docid in exact_query_scores]
                     print("Case 4:", returnableList)
 
 
-                    # for i in range(len(exact_query_scores)):
-                    #     print(f"Page {i + 1}: {docMapping[str(exact_query_scores[i][0])][1]}, {docMapping[str(exact_query_scores[i][0])]}")
-
         except FileNotFoundError:
             print("Invalid query.")
         except KeyError:
             print("No results found.")
-            ## TODO TODO similarity
-            # print(exact_query_scores)
 
     endTime = time.time()
 
-    # print(f"Time Elapsed: {int(1000 * (time.time() - startTime))} milliseconds")
-
     return returnableList, int(1000*(endTime-startTime))
 
-#########################################
-
-# import os,json
-
-# fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
-
-# docMapping = dict()
-# j = 0
-# for i, subdir in enumerate(fullWalk):
-#     for file in subdir[2]:
-
-#         if j % 1000 == 0:
-#             print(f"{j} Webpages Evaluated")
-#             # print(docMapping)
-
-#         docMapping[j] = [subdir[0] + "\\" + file]
-
-#         with open(os.getcwd() + docMapping[j][0], "r") as htmlFile:
-#             docMapping[j].append(json.load(htmlFile)['url'])
-
-#         j += 1
 
 
-# with open(os.getcwd() + "\\documentHashmap.json", "w") as documentHashmap:
-#     json.dump(docMapping, documentHashmap)
+# Reference(s):
+# NLTK Package (2024). University of Pennsylvania. https://guides.library.upenn.edu/penntdm/python/nltk

@@ -1,7 +1,5 @@
-# from DEV import *
 import math
 import string
-
 import nltk
 import bs4
 import json
@@ -17,11 +15,11 @@ docTextHashTable = set()
 
 fullWalk = [i for i in os.walk(".\\DEV") if len(i[1]) == 0]
 
-#TODO stem here
-#TODO Cite Stemmer https://guides.library.upenn.edu/penntdm/python/nltk
+
+# Porter Stemmer from (NLTK Package, 2024).
 porter = nltk.stem.PorterStemmer()
 
-######################################
+# Making a json file for each of the characters and digits in our scope
 for c in characters:
     file_path = os.getcwd() + "\\indices\\" + c + ".json"
     f = open(file_path, "w")
@@ -29,39 +27,49 @@ for c in characters:
     f.close()
 
 
-j = 0
+j = 0 # Counting the number of files in DEV
+
+# Init the inverted index
+invertedIndex = dict() 
+startTime = time.time()
+
+# Cycle through the files in DEV
 for i, subdir in enumerate(fullWalk):
-    
-    invertedIndex = dict()
-    startTime = time.time()
     for file in subdir[2]:
       
+        # Get the file from DEV
         fileName = f".\\{subdir[0]}\\{file}"
         
         total_words = 0
         with open(fileName, "r") as fileObj:
+
+            # Load the content from that webpage
             content = json.load(fileObj)['content']
             
-
-            # TODO TODO Cite the hash documentation
+            # Python built-in hash functionality from (Hashing and Dictionaries, 2019).
+            # Pass over the duplicate page
             if hash(content) in docTextHashTable:
                 print(f"Document Content with Hash {hash(content)} has already been evaluated. Skipping...")
                 j += 1
                 continue
             
+            # Python built-in hash functionality from (Hashing and Dictionaries, 2019).
             docTextHashTable.add(hash(content))
         
+            # Make a BeautifulSoup object of it
             bsObject = bs4.BeautifulSoup(content, features="html.parser")
 
+            # Making a set of words which are in the headers, titles, boldface, etc.
             allHeaders = bsObject.find_all('h1') + bsObject.find_all('h2') + bsObject.find_all('h3')
             allBold = bsObject.find_all('strong') + bsObject.find_all('b')
             allTitles = bsObject.find_all('title')
             importantWords = set(" ".join([str(allHeaders), str(allBold), str(allTitles)]).lower().split(" "))
 
+            # Get the text from the BeautifulSoup object and tokenize it with NLTK
             allText = bsObject.get_text()
-
             wordFreq = {x.lower():0 for x in nltk.word_tokenize(allText) if re.match(r'^[a-zA-Z0-9]+$', x)}
             
+            # Count the word frequency from the page if they are proper alphanumerics
             for word in nltk.word_tokenize(allText):
                 total_words += 1
                 if re.match(r'^[a-zA-Z0-9]+$', word):
@@ -72,13 +80,12 @@ for i, subdir in enumerate(fullWalk):
             for token in wordFreq.keys():
                 magnify = 1.1 if token in importantWords else 1
 
+                # Porter Stemmer Implementation from (NLTK Package, 2024).
                 if porter.stem(token) in stemmedWordFreq.keys():
                     stemmedWordFreq[porter.stem(token)] += (wordFreq[token] * magnify)
                 else:
                     stemmedWordFreq[porter.stem(token)] = (wordFreq[token] * magnify)
 
-                #TODO Cite Stemmer
-                #TODO Check for Duplicate j values in lists see if valid
 
             for token in stemmedWordFreq.keys():
                 """
@@ -160,16 +167,9 @@ for char in tokenChars:
 del invertedIndex
 invertedIndex = dict()
 
-
-
 print("Done With TF Calculations")
-####################################### TF Section ^^^
 
 
-
-
-
-####################################### IDF Section vvv
 unique_words = 0
 file_count = sum(len(files) for _, _, files in os.walk('.\\DEV'))
 
@@ -203,9 +203,6 @@ for character in characters:
 
     print(f"JSON Character {character} Done")
 
-
-# characters = string.ascii_lowercase + string.digits
-
 for x in characters:
     with open(os.getcwd() + "\\indices\\" + x + ".json", "r") as json_file:
         data = json.load(json_file)
@@ -215,10 +212,12 @@ for x in characters:
 
     print(f"PKL Character {x} Done")
 
-
-
 print("Done With IDF Calculations")
 
 print("Unique tokens: " + str(unique_words))
 
-#######################################
+
+
+# Reference(s):
+# Hashing and Dictionaries. (2019). Carnegie Mellon University. https://www.cs.cmu.edu/~15110-f19/slides/week8-1-hashing.pdf
+# NLTK Package. (2024). University of Pennsylvania. https://guides.library.upenn.edu/penntdm/python/nltk
